@@ -1,4 +1,11 @@
 {
     "name": "petecoop/odt",
-    "require": {}
+    "autoload": {
+        "psr-4": {
+            "Petecoop\\ODT\\": "src"
+        }
+    },
+    "require": {
+        "nelexa/zip": "^4.0"
+    }
 }
