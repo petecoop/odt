@@ -2,20 +2,16 @@
 
 Compile ODT files with Blade.
 
-Requires a `BladeCompiler` to be passed into it, with the intention that it can be used outside of Laravel but still be based on Blade.
+`composer require petecoop/odt`
 
 ```php
-$compiler = app(BladeCompiler::class);
-$shared = app(Factory::class)->getShared();
+use Petecoop\ODT\Facades\ODT;
 
-$odt = new ODT($compiler);
-
-$odt->open(resource_path('file.odt'))
-    ->render(array_merge($shared, [
+ODT::open(resource_path('file.odt'))
+    ->render([
         'some' => 'arguments'
-    ]))
+    ])
     ->outputAsSymfonyResponse('file.odt');
-
 ```
 
 ## Tables

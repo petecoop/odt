@@ -5,20 +5,22 @@ namespace Petecoop\ODT;
 class Compiler
 {
     private $bladeCompiler;
+    private array $globalArgs;
 
-    public function __construct($bladeCompiler)
+    public function __construct($bladeCompiler, array $globalArgs = [])
     {
         $this->bladeCompiler = $bladeCompiler;
+        $this->globalArgs = $globalArgs;
 
         $this->bladeCompiler->precompiler(fn($value) => $this->compileTableRow($value));
     }
 
-    public function compile(string $template, array $args)
+    public function compile(string $template, array $args = [])
     {
         $bladeCompiled = $this->bladeCompiler->compileString($template);
 
         ob_start();
-        extract($args, EXTR_SKIP);
+        extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
         try {
             eval('?>'.$bladeCompiled);
         } catch (\Exception $e) {
