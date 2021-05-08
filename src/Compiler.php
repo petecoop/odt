@@ -13,20 +13,36 @@ class Compiler
     {
         $this->bladeCompiler = $bladeCompiler;
         $this->globalArgs = $globalArgs;
-
-        $this->bladeCompiler->precompiler(fn($value) => $this->compileTableRow($value));
     }
 
     public function compile(Template $template, array $args = [])
     {
-        $this->bladeCompiler->precompiler(fn($value) => $this->compileTableTemplate($value, $args));
+        $content = $template->content();
+        $content = $this->precompile($content, $args);
+        $content = $this->bladeCompile($content);
 
-        $bladeCompiled = $this->bladeCompiler->compileString($template->content());
+        return $this->render($content, $args);
+    }
 
+    private function precompile(string $content, array $args)
+    {
+        $content = $this->compileTableRow($content);
+        $content = $this->compileTableTemplate($content, $args);
+
+        return $content;
+    }
+
+    private function bladeCompile(string $content)
+    {
+        return $this->bladeCompiler->compileString($content);
+    }
+
+    private function render(string $renderableContent, $args)
+    {
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
         try {
-            eval('?>'.$bladeCompiled);
+            eval('?>'.$renderableContent);
         } catch (\Exception $e) {
             ob_get_clean();
             throw $e;
