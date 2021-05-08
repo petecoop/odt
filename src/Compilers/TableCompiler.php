@@ -5,7 +5,7 @@ namespace Petecoop\ODT\Compilers;
 use DOMDocument;
 use Symfony\Component\DomCrawler\Crawler;
 
-class TableCompiler
+class TableCompiler implements Compiler
 {
     private string $name;
     private string $key;
@@ -63,6 +63,7 @@ class TableCompiler
     private function getOutput()
     {
         $xml = $this->crawler->outerHtml();
+        // TODO this should probably be done in a different way as any existing &gt; will be converted...
         $xml = str_replace('&gt;', '>', $xml);
 
         return $xml;
@@ -127,7 +128,11 @@ class TableCompiler
             return $name;
         }
 
-        $styleParent->getNode(0)->appendChild($this->createFragment('<style:style style:name="'.$name.'" style:family="table-column"><style:table-column-properties style:rel-column-width="'.$flex.'000*" /></style:style>'));
+        $styleParent->getNode(0)->appendChild($this->createFragment(
+            '<style:style style:name="'.$name.'" style:family="table-column">' .
+                '<style:table-column-properties style:rel-column-width="'.$flex.'000*" />' .
+            '</style:style>'
+        ));
 
         $this->columnStyles[$flex] = $name;
 
@@ -159,4 +164,3 @@ class TableCompiler
         return $fragment;
     }
 }
-

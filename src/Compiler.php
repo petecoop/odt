@@ -3,6 +3,7 @@
 namespace Petecoop\ODT;
 
 use Petecoop\ODT\Compilers\TableCompiler;
+use Petecoop\ODT\Compilers\TableRowCompiler;
 
 class Compiler
 {
@@ -26,7 +27,7 @@ class Compiler
 
     private function precompile(string $content, array $args)
     {
-        $content = $this->compileTableRow($content);
+        $content = (new TableRowCompiler())->compile($content);
         $content = $this->compileTableTemplate($content, $args);
 
         return $content;
@@ -49,40 +50,6 @@ class Compiler
         }
 
         return ob_get_clean();
-    }
-
-    private function compileTableRow($value)
-    {
-
-        // find content between @beforerow @endbeforerow
-        $pattern = "/@beforerow(.+?)@endbeforerow/";
-        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
-            $offset = $match[0][1];
-            $content = $match[1][0];
-            $length = strlen($match[0][0]);
-
-            // find closest table start & insert content
-            $tableStart = strrpos($value, '<table:table-row', $offset - strlen($value));
-            $value = substr_replace($value, $content, $tableStart, 0);
-            // remove from row
-            $value = substr_replace($value, '', $offset + strlen($content), $length);
-        }
-
-        // find @afterrow
-        // insert after </table:table-row>
-        $pattern = "/@afterrow(.+?)@endafterrow/";
-        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
-            $offset = $match[0][1];
-            $content = $match[1][0];
-            $length = strlen($match[0][0]);
-
-            $tableEnd = '</table:table-row>';
-            $pos = strpos($value, $tableEnd, $offset);
-            $value = substr_replace($value, $content, $pos + strlen($tableEnd), 0);
-            $value = substr_replace($value, '', $offset, $length);
-        }
-
-        return $value;
     }
 
     public function compileTableTemplate($value, array $args = [])
