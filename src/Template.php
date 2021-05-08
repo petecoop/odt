@@ -20,12 +20,12 @@ class Template
 
     public function render(array $args): ZipFile
     {
-        $content = $this->compiler->compile($this->content(), $args);
+        $content = $this->compiler->compile($this, $args);
 
         return $this->zip->addFromString('content.xml', $content);
     }
 
-    private function content(): string
+    public function content(): string
     {
         return $this->zip->getEntryContents('content.xml');
     }

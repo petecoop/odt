@@ -2,6 +2,8 @@
 
 namespace Petecoop\ODT;
 
+use Petecoop\ODT\Compilers\TableCompiler;
+
 class Compiler
 {
     private $bladeCompiler;
@@ -15,9 +17,11 @@ class Compiler
         $this->bladeCompiler->precompiler(fn($value) => $this->compileTableRow($value));
     }
 
-    public function compile(string $template, array $args = [])
+    public function compile(Template $template, array $args = [])
     {
-        $bladeCompiled = $this->bladeCompiler->compileString($template);
+        $this->bladeCompiler->precompiler(fn($value) => $this->compileTableTemplate($value, $args));
+
+        $bladeCompiled = $this->bladeCompiler->compileString($template->content());
 
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
@@ -31,7 +35,7 @@ class Compiler
         return ob_get_clean();
     }
 
-    public function compileTableRow($value)
+    private function compileTableRow($value)
     {
 
         // find content between @beforerow @endbeforerow
@@ -62,6 +66,27 @@ class Compiler
             $value = substr_replace($value, '', $offset, $length);
         }
 
+        return $value;
+    }
+
+    public function compileTableTemplate($value, array $args = [])
+    {
+        $pattern = "/@table\((.+?)\)(.+?)@endtable/";
+
+        preg_match_all($pattern, $value, $matches);
+        foreach ($matches[0] as $index => $match) {
+            $key = str_replace('$', '', strip_tags($matches[1][$index]));
+            preg_match("/table:name=\"(.+?)\"/", $match, $m);
+            $name = $m[1];
+
+            $value = (new TableCompiler($name, $key, $args[$key] ?? []))->compile($value);
+
+            // replace @table($users) with $foreach($users as $users_item)
+            // replace @endtable with @endforeach
+            // finding nearest table-rows...
+        }
+
+        // dd($value);
         return $value;
     }
 }
