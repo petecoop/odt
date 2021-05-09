@@ -22,8 +22,8 @@ class TableRowCompiler implements Compiler
             $length = strlen($match[0][0]);
 
             // find closest table start & insert content
-            $tableStart = strrpos($value, '<table:table-row', $offset - strlen($value));
-            $value = substr_replace($value, $content, $tableStart, 0);
+            $rowStart = strrpos($value, '<table:table-row', $offset - strlen($value));
+            $value = substr_replace($value, $content, $rowStart, 0);
             // remove from row
             $value = substr_replace($value, '', $offset + strlen($content), $length);
         }
@@ -41,9 +41,9 @@ class TableRowCompiler implements Compiler
             $content = $match[1][0];
             $length = strlen($match[0][0]);
 
-            $tableEnd = '</table:table-row>';
-            $pos = strpos($value, $tableEnd, $offset);
-            $value = substr_replace($value, $content, $pos + strlen($tableEnd), 0);
+            $rowEnd = '</table:table-row>';
+            $pos = strpos($value, $rowEnd, $offset);
+            $value = substr_replace($value, $content, $pos + strlen($rowEnd), 0);
             $value = substr_replace($value, '', $offset, $length);
         }
 

@@ -11,7 +11,6 @@ class TableCompiler implements Compiler
     private string $key;
     private array $values;
 
-    private DOMDocument $dom;
     private Crawler $crawler;
     private Crawler $table;
     private Crawler $header;
@@ -62,11 +61,7 @@ class TableCompiler implements Compiler
 
     private function getOutput()
     {
-        $xml = $this->crawler->outerHtml();
-        // TODO this should probably be done in a different way as any existing &gt; will be converted...
-        $xml = str_replace('&gt;', '>', $xml);
-
-        return $xml;
+        return $this->crawler->outerHtml();
     }
 
     private function addColumn(string $key, $options)
@@ -146,9 +141,18 @@ class TableCompiler implements Compiler
         return $this->createFragment($header);
     }
 
-    private function createCell(string $key)
+    private function createCell(string $key, bool $firstCell = false)
     {
-        $content = str_replace('values', '{{ $'.$this->key.'_item->'.$key.' }}', $this->cellContentTemplate);
+        $itemKey = '$' . $this->key . '_item';
+        $value = "{{ {$itemKey}['{$key}'] ?? '' }}";
+
+        if ($firstCell) {
+            $value = '@beforerow@foreach($'.$this->key.' as '.$itemKey.')@endbeforerow'
+                . $value
+                . '@afterrow@endforeach@endafterrow';
+        }
+
+        $content = str_replace('values', $value, $this->cellContentTemplate);
 
         $cell = str_replace($this->cellContentTemplate, $content, $this->cellTemplate);
         return $this->createFragment($cell);

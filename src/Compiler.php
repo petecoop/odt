@@ -2,6 +2,7 @@
 
 namespace Petecoop\ODT;
 
+use DOMDocument;
 use Petecoop\ODT\Compilers\TableCompiler;
 use Petecoop\ODT\Compilers\TableRowCompiler;
 
@@ -27,8 +28,9 @@ class Compiler
 
     private function precompile(string $content, array $args)
     {
-        $content = (new TableRowCompiler())->compile($content);
         $content = $this->compileTableTemplate($content, $args);
+        $content = (new TableRowCompiler())->compile($content);
+        $content = $this->convertOperators($content);
 
         return $content;
     }
@@ -52,24 +54,59 @@ class Compiler
         return ob_get_clean();
     }
 
-    public function compileTableTemplate($value, array $args = [])
+    public function compileTableTemplate(string $value, array $args = [])
     {
         $pattern = "/@table\((.+?)\)(.+?)@endtable/";
+        $offset = 0;
+        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
+            $offset = $match[0][1];
+            $content = $match[0][0];
+            $length = strlen($content);
+            $key = str_replace('$', '', strip_tags($match[1][0]));
 
-        preg_match_all($pattern, $value, $matches);
-        foreach ($matches[0] as $index => $match) {
-            $key = str_replace('$', '', strip_tags($matches[1][$index]));
-            preg_match("/table:name=\"(.+?)\"/", $match, $m);
+            preg_match("/table:name=\"(.+?)\"/", $content, $m);
             $name = $m[1];
 
-            $value = (new TableCompiler($name, $key, $args[$key] ?? []))->compile($value);
+            // remove the @table tags
+            [$value, $offset,, $removedEnd] = $this->removeClosestTag($value, 'text:p', $offset);
+            $length -= $removedEnd;
+            [$value,, $removedStart] = $this->removeClosestTag($value, 'text:p', $offset + $length);
+            $length -= $removedStart;
 
-            // replace @table($users) with $foreach($users as $users_item)
-            // replace @endtable with @endforeach
-            // finding nearest table-rows...
+            // if no key remove table
+            if (!isset($args[$key])) {
+                $value = substr_replace($value, '', $offset, $length);
+                continue;
+            }
+
+            $value = (new TableCompiler($name, $key, $args[$key] ?? []))->compile($value);
         }
 
-        // dd($value);
         return $value;
+    }
+
+    private function convertOperators(string $value)
+    {
+        return str_replace('T_OBJECT_OPERATOR', '->', $value);
+    }
+
+    private function removeClosestTag(string $value, string $tag, int $offset)
+    {
+        $tagStart = '<' . $tag;
+        $tagEnd = '</' . $tag . '>';
+
+        // search backwards from offset to find the start
+        $start = strrpos($value, $tagStart, $offset - strlen($value));
+
+        // search forwards to find the end
+        $end = strpos($value, $tagEnd, $offset) + strlen($tagEnd);
+
+        $len = $end - $start;
+        $value = substr_replace($value, '', $start, $len);
+
+        $removedStart = $offset - $start;
+        $removedEnd = $end - $offset;
+
+        return [$value, $offset - $removedStart, $removedStart, $removedEnd];
     }
 }
