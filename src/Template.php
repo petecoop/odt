@@ -9,6 +9,8 @@ class Template
     private string $path;
     private Compiler $compiler;
 
+    private array $tableOptions = [];
+
     public function __construct(string $path, Compiler $compiler)
     {
         $this->path = $path;
@@ -28,5 +30,16 @@ class Template
     public function content(): string
     {
         return $this->zip->getEntryContents('content.xml');
+    }
+
+    public function table(string $key, array $options)
+    {
+        $this->tableOptions[$key] = $options;
+        return $this;
+    }
+
+    public function getTableOptions()
+    {
+        return $this->tableOptions;
     }
 }

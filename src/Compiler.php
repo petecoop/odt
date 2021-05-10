@@ -2,7 +2,6 @@
 
 namespace Petecoop\ODT;
 
-use DOMDocument;
 use Petecoop\ODT\Compilers\TableCompiler;
 use Petecoop\ODT\Compilers\TableRowCompiler;
 
@@ -19,16 +18,19 @@ class Compiler
 
     public function compile(Template $template, array $args = [])
     {
-        $content = $template->content();
-        $content = $this->precompile($content, $args);
+        $content = $this->precompile($template, $args);
         $content = $this->bladeCompile($content);
 
         return $this->render($content, $args);
     }
 
-    private function precompile(string $content, array $args)
+    private function precompile(Template $template, array $args)
     {
-        $content = $this->compileTableTemplate($content, $args);
+        $content = $template->content();
+
+        $tableOptions = $template->getTableOptions();
+        $content = $this->compileTableTemplate($content, $args, $tableOptions);
+
         $content = (new TableRowCompiler())->compile($content);
         $content = $this->convertOperators($content);
 
@@ -54,7 +56,7 @@ class Compiler
         return ob_get_clean();
     }
 
-    public function compileTableTemplate(string $value, array $args = [])
+    private function compileTableTemplate(string $value, array $args = [], array $tableOptions = [])
     {
         $pattern = "/@table\((.+?)\)(.+?)@endtable/";
         $offset = 0;
@@ -79,7 +81,8 @@ class Compiler
                 continue;
             }
 
-            $value = (new TableCompiler($name, $key, $args[$key] ?? []))->compile($value);
+            $compiler = new TableCompiler($name, $key, $args[$key] ?? [], $tableOptions[$key] ?? []);
+            $value = $compiler->compile($value);
         }
 
         return $value;
