@@ -16,29 +16,23 @@ class Compiler
         $this->globalArgs = $globalArgs;
     }
 
-    public function compile(Template $template, array $args = []): array
+    public function compile(Template $template, array $args = [], array $options = []): array
     {
         return [
-            'content' => $this->compileContent($template, $args),
-            'styles' => $this->compileStyles($template, $args),
+            'content' => $this->compileXML($template->content(), $template, $args, $options),
+            'styles' => $this->compileXML($template->styles(), $template, $args, $options),
         ];
     }
 
-    private function compileContent(Template $template, array $args = []): string
+    private function compileXML(string $xml, Template $template, array $args = [], array $options = []): string
     {
-        $content = $template->content();
-        $content = $this->precompile($content, $template, $args);
-        $content = $this->bladeCompile($content);
+        if ($options['cleanVariables']) {
+            $xml = $this->cleanVariables($xml);
+        }
+        $xml = $this->precompile($xml, $template, $args);
+        $xml = $this->bladeCompile($xml);
 
-        return $this->render($content, $args);
-    }
-
-    private function compileStyles(Template $template, array $args = []): string
-    {
-        $styles = $template->styles();
-        $styles = $this->bladeCompile($styles);
-
-        return $this->render($styles, $args);
+        return $this->render($xml, $args);
     }
 
     private function precompile(string $value, Template $template, array $args): string
@@ -52,9 +46,9 @@ class Compiler
         return $value;
     }
 
-    private function bladeCompile(string $content): string
+    private function bladeCompile(string $value, bool $cleanVariables = false): string
     {
-        return $this->bladeCompiler->compileString($content);
+        return $this->bladeCompiler->compileString($value);
     }
 
     private function render(string $renderableContent, $args): string
@@ -126,5 +120,50 @@ class Compiler
         $removedEnd = $end - $offset;
 
         return [$value, $offset - $removedStart, $removedStart, $removedEnd];
+    }
+
+    /**
+     * Find Blade vars and strip out any tags inside them so blade can compile
+     */
+    private function cleanVariables(string $value): string
+    {
+        $pattern = '/{[^}]*{[^}]*\$.+?}[^{]*}/s';
+        $offset = 0;
+        $length = 0;
+        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE, $offset + $length)) {
+            $offset = $match[0][1];
+            $content = $match[0][0];
+            $length = strlen($content);
+
+            $cleaned = strip_tags($content);
+            $cleanedLength = strlen($cleaned);
+            if ($cleanedLength !== $length) {
+                preg_match_all('/<([^\/]+?)\s/', $content, $openingTags);
+                preg_match_all('/<\/(.+?)>/', $content, $closingTags);
+                if (count($openingTags[0]) > count($closingTags[0])) {
+                    // more opening tags - remove next closing tag
+                    $tag = '</' . array_slice($openingTags[1], -1)[0] . '>';
+                    $end = strpos($value, $tag, $offset + $length) + strlen($tag);
+                    $diff = $end - ($offset + $length);
+                    $cleanedLength += $diff;
+                    $length += $diff;
+                }
+
+                if (count($openingTags[0]) < count($closingTags[0])) {
+                    // more closing - remove previous opening tag
+                    $tag = '<' . array_slice($closingTags[1], -1)[0];
+                    $start = strrpos($value, $tag, $offset - strlen($value));
+                    $diff = $offset - $start;
+                    $cleanedLength += $diff;
+                    $length += $diff;
+                    $offset -= $diff;
+                }
+
+                $value = substr_replace($value, $cleaned, $offset, $length);
+                $length = $cleanedLength;
+            }
+        }
+
+        return $value;
     }
 }

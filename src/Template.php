@@ -20,9 +20,9 @@ class Template
         $this->zip->openFile($path);
     }
 
-    public function render(array $args): ZipFile
+    public function render(array $args, array $options = []): ZipFile
     {
-        $compiled = $this->compiler->compile($this, $args);
+        $compiled = $this->compiler->compile($this, $args, $options);
 
         return $this->zip
             ->addFromString('content.xml', $compiled['content'])
