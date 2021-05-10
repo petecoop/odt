@@ -46,7 +46,7 @@ class Compiler
         return $value;
     }
 
-    private function bladeCompile(string $value, bool $cleanVariables = false): string
+    private function bladeCompile(string $value): string
     {
         return $this->bladeCompiler->compileString($value);
     }
