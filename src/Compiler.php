@@ -16,33 +16,48 @@ class Compiler
         $this->globalArgs = $globalArgs;
     }
 
-    public function compile(Template $template, array $args = [])
+    public function compile(Template $template, array $args = []): array
     {
-        $content = $this->precompile($template, $args);
+        return [
+            'content' => $this->compileContent($template, $args),
+            'styles' => $this->compileStyles($template, $args),
+        ];
+    }
+
+    private function compileContent(Template $template, array $args = []): string
+    {
+        $content = $template->content();
+        $content = $this->precompile($content, $template, $args);
         $content = $this->bladeCompile($content);
 
         return $this->render($content, $args);
     }
 
-    private function precompile(Template $template, array $args)
+    private function compileStyles(Template $template, array $args = []): string
     {
-        $content = $template->content();
+        $styles = $template->styles();
+        $styles = $this->bladeCompile($styles);
 
-        $tableOptions = $template->getTableOptions();
-        $content = $this->compileTableTemplate($content, $args, $tableOptions);
-
-        $content = (new TableRowCompiler())->compile($content);
-        $content = $this->convertOperators($content);
-
-        return $content;
+        return $this->render($styles, $args);
     }
 
-    private function bladeCompile(string $content)
+    private function precompile(string $value, Template $template, array $args): string
+    {
+        $tableOptions = $template->getTableOptions();
+        $value = $this->compileTableTemplate($value, $args, $tableOptions);
+
+        $value = (new TableRowCompiler())->compile($value);
+        $value = $this->convertOperators($value);
+
+        return $value;
+    }
+
+    private function bladeCompile(string $content): string
     {
         return $this->bladeCompiler->compileString($content);
     }
 
-    private function render(string $renderableContent, $args)
+    private function render(string $renderableContent, $args): string
     {
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
@@ -56,7 +71,7 @@ class Compiler
         return ob_get_clean();
     }
 
-    private function compileTableTemplate(string $value, array $args = [], array $tableOptions = [])
+    private function compileTableTemplate(string $value, array $args = [], array $tableOptions = []): string
     {
         $pattern = "/@table\((.+?)\)(.+?)@endtable/";
         $offset = 0;
@@ -88,12 +103,12 @@ class Compiler
         return $value;
     }
 
-    private function convertOperators(string $value)
+    private function convertOperators(string $value): string
     {
         return str_replace('T_OBJECT_OPERATOR', '->', $value);
     }
 
-    private function removeClosestTag(string $value, string $tag, int $offset)
+    private function removeClosestTag(string $value, string $tag, int $offset): array
     {
         $tagStart = '<' . $tag;
         $tagEnd = '</' . $tag . '>';

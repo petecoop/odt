@@ -22,9 +22,11 @@ class Template
 
     public function render(array $args): ZipFile
     {
-        $content = $this->compiler->compile($this, $args);
+        $compiled = $this->compiler->compile($this, $args);
 
-        return $this->zip->addFromString('content.xml', $content);
+        return $this->zip
+            ->addFromString('content.xml', $compiled['content'])
+            ->addFromString('styles.xml', $compiled['styles']);
     }
 
     public function content(): string
@@ -32,13 +34,18 @@ class Template
         return $this->zip->getEntryContents('content.xml');
     }
 
-    public function table(string $key, array $options)
+    public function styles(): string
+    {
+        return $this->zip->getEntryContents('styles.xml');
+    }
+
+    public function table(string $key, array $options): self
     {
         $this->tableOptions[$key] = $options;
         return $this;
     }
 
-    public function getTableOptions()
+    public function getTableOptions(): array
     {
         return $this->tableOptions;
     }

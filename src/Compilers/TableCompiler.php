@@ -3,6 +3,7 @@
 namespace Petecoop\ODT\Compilers;
 
 use DOMDocument;
+use DOMDocumentFragment;
 use Symfony\Component\DomCrawler\Crawler;
 
 class TableCompiler implements Compiler
@@ -61,7 +62,7 @@ class TableCompiler implements Compiler
         $this->cellContentTemplate = $cell->html();
     }
 
-    private function getOutput()
+    private function getOutput(): string
     {
         return $this->crawler->outerHtml();
     }
@@ -124,7 +125,7 @@ class TableCompiler implements Compiler
         }
     }
 
-    private function createColumn(?string $style = null)
+    private function createColumn(?string $style = null): DOMDocumentFragment
     {
         $column = $this->columnTemplate;
 
@@ -161,14 +162,14 @@ class TableCompiler implements Compiler
         return $name;
     }
 
-    private function createHeader(string $title)
+    private function createHeader(string $title): DOMDocumentFragment
     {
         $header = preg_replace('/{{\s*\$header\s*}}/', $title, $this->headerTemplate);
 
         return $this->createFragment($header);
     }
 
-    private function createCell(string $key, bool $firstCell = false)
+    private function createCell(string $key, bool $firstCell = false): DOMDocumentFragment
     {
         $itemKey = '$' . $this->key . '_item';
         $value = "{{ {$itemKey}['{$key}'] ?? '' }}";
@@ -185,7 +186,7 @@ class TableCompiler implements Compiler
         return $this->createFragment($cell);
     }
 
-    private function createFragment($xml)
+    private function createFragment($xml): DOMDocumentFragment
     {
         libxml_use_internal_errors(true);
         $fragment = $this->dom->createDocumentFragment();
@@ -195,7 +196,7 @@ class TableCompiler implements Compiler
         return $fragment;
     }
 
-    private function titleCase(string $value)
+    private function titleCase(string $value): string
     {
         $value = str_replace('_', ' ', $value);
         return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
