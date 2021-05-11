@@ -11,7 +11,7 @@ ODT::open(resource_path('file.odt'))
     ->render([
         'some' => 'arguments'
     ])
-    ->outputAsSymfonyResponse('file.odt');
+    ->symfonyResponse('file.odt');
 ```
 
 ## Tables

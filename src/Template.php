@@ -20,13 +20,15 @@ class Template
         $this->zip->openFile($path);
     }
 
-    public function render(array $args, array $options = []): ZipFile
+    public function render(array $args, array $options = []): Output
     {
         $compiled = $this->compiler->compile($this, $args, $options);
 
-        return $this->zip
+        $zip = $this->zip
             ->addFromString('content.xml', $compiled['content'])
             ->addFromString('styles.xml', $compiled['styles']);
+
+        return new Output($zip);
     }
 
     public function content(): string
