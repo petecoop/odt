@@ -5,6 +5,7 @@ namespace Petecoop\ODT;
 use PhpZip\ZipFile;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 
 class Output
 {
@@ -15,9 +16,31 @@ class Output
         $this->zip = $zip;
     }
 
-    public function saveAsFile(string $fileName): self
+    public function saveAsODT(string $fileName): self
     {
         $this->zip->saveAsFile($fileName);
+        return $this;
+    }
+
+    public function saveAsPDF(string $fileName, ?string $bin = 'soffice'): self
+    {
+        $converter = new OfficeConverter($bin);
+        $tmp = (new TemporaryDirectory())->create();
+
+        try {
+            $tmpPath = $tmp->path('temp.odt');
+            $this->saveAsODT($tmpPath);
+
+            $pdfPath = $tmp->path('temp.pdf');
+            $converter->convert($tmpPath, $tmp->path());
+
+            rename($pdfPath, $fileName);
+        } catch (\Throwable $e) {
+            throw $e;
+        } finally {
+            $tmp->delete();
+        }
+
         return $this;
     }
 
