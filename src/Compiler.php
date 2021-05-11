@@ -26,7 +26,7 @@ class Compiler
 
     private function compileXML(string $xml, Template $template, array $args = [], array $options = []): string
     {
-        if ($options['cleanVars']) {
+        if ($options['cleanVars'] ?? false) {
             $xml = $this->cleanVariables($xml);
         }
         $xml = $this->precompile($xml, $template, $args);
