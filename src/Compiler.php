@@ -84,8 +84,8 @@ class Compiler
             [$value,, $removedStart] = $this->removeClosestTag($value, 'text:p', $offset + $length);
             $length -= $removedStart;
 
-            // if no key remove table
-            if (!isset($args[$key])) {
+            // if no key or key empty remove table
+            if (!isset($args[$key]) || empty($args[$key])) {
                 $value = substr_replace($value, '', $offset, $length);
                 continue;
             }
