@@ -1,5 +1,13 @@
 {
     "name": "petecoop/odt",
+    "description": "Render .odt files with Blade, convert to pdf with Libre/OpenOffice",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pete Cooper",
+            "email": "pete@petecoop.co.uk"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Petecoop\\ODT\\": "src"
