@@ -48,11 +48,23 @@ class Compiler
 
     private function bladeCompile(string $value): string
     {
-        return $this->bladeCompiler->compileString($value);
+        $this->bladeCompiler->setEchoFormat('$replace_line_breaks(e(%s))');
+
+        $compiled = $this->bladeCompiler->compileString($value);
+
+        $this->bladeCompiler->setEchoFormat('e(%s)');
+
+        return $compiled;
     }
 
     private function render(string $renderableContent, $args): string
     {
+        $args = $args + [
+            'replace_line_breaks' => function ($value) {
+                return str_replace("\n", '<text:line-break />', $value);
+            },
+        ];
+
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
         try {
