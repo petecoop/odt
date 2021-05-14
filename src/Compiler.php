@@ -147,7 +147,7 @@ class Compiler
         $variablePattern = '/{[^}]*{[^}]*\$.+?}[^{]*}/s';
         $value = $this->cleanPattern($value, $variablePattern);
 
-        $bladeAts = '/(@(?!end).+?\))</s';
+        $bladeAts = '/(@[a-z]+\(.+?\))</s';
         $value = $this->cleanPattern($value, $bladeAts);
 
         return $value;
