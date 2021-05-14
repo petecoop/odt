@@ -111,7 +111,10 @@ class Compiler
 
     private function convertOperators(string $value): string
     {
-        return str_replace('T_OBJECT_OPERATOR', '->', $value);
+        $value = str_replace('T_OBJECT_OPERATOR', '->', $value);
+        $value = str_replace("\u{2192}", '->', $value);
+
+        return $value;
     }
 
     private function removeClosestTag(string $value, string $tag, int $offset): array
