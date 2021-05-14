@@ -109,10 +109,12 @@ class Compiler
         return $value;
     }
 
+    /**
+     * Convert operators that have been placed in previous compilers
+     */
     private function convertOperators(string $value): string
     {
         $value = str_replace('T_OBJECT_OPERATOR', '->', $value);
-        $value = str_replace("\u{2192}", '->', $value);
 
         return $value;
     }
@@ -151,6 +153,12 @@ class Compiler
             $length = strlen($content);
 
             $cleaned = strip_tags($content);
+
+            // replace unicode characters
+            $cleaned = str_replace("\u{2192}", '->', $cleaned);
+            $cleaned = preg_replace("/\u{2018}|\u{2019}/", "'", $cleaned);
+            $cleaned = preg_replace("/\u{201C}|\u{201D}/", '"', $cleaned);
+
             $cleanedLength = strlen($cleaned);
             if ($cleanedLength !== $length) {
                 preg_match_all('/<([^\/]+?)\s/', $content, $openingTags);
