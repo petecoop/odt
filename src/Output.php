@@ -53,4 +53,14 @@ class Output
     {
         return $this->zip->outputAsPsr7Response($response, $fileName);
     }
+
+    public function content(): string
+    {
+        return $this->zip->getEntryContents('content.xml');
+    }
+
+    public function styles(): string
+    {
+        return $this->zip->getEntryContents('styles.xml');
+    }
 }

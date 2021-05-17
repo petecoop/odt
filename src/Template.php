@@ -20,7 +20,7 @@ class Template
         $this->zip->openFile($path);
     }
 
-    public function render(array $args, array $options = []): Output
+    public function render(array $args = [], array $options = []): Output
     {
         $compiled = $this->compiler->compile($this, $args, $options);
 

@@ -5,15 +5,16 @@ namespace Petecoop\ODT;
 use Petecoop\ODT\Compilers\Helper;
 use Petecoop\ODT\Compilers\VariableCleaner;
 use Petecoop\ODT\Directives\ImageDirective;
+use Illuminate\View\Compilers\BladeCompiler;
 use Petecoop\ODT\Compilers\TableRowCompiler;
 use Petecoop\ODT\Compilers\TableDirectiveCompiler;
 
 class Compiler
 {
-    private $bladeCompiler;
+    private BladeCompiler $bladeCompiler;
     private array $globalArgs;
 
-    public function __construct($bladeCompiler, array $globalArgs = [])
+    public function __construct(BladeCompiler $bladeCompiler, array $globalArgs = [])
     {
         $this->bladeCompiler = $bladeCompiler;
         $this->globalArgs = $globalArgs;
