@@ -27,25 +27,35 @@ class Helper
         return $pos !== false ? substr_replace($value, '', 0, $pos + strlen($find)) : $value;
     }
 
-    public function getBase64ImageWidth(string $value)
-    {
-        [$x] = $this->getBase64ImageDimensions($value);
-        return ($x * 0.02) . 'cm';
-    }
-
-    public function getBase64ImageHeight(string $value)
-    {
-        [, $y] = $this->getBase64ImageDimensions($value);
-        return ($y * 0.02) . 'cm';
-    }
-
-    private function getBase64ImageDimensions(string $value)
+    public function getBase64ImageDimensions(string $value, ?string $maxWidth = null, ?string $maxHeight = null)
     {
         $key = sha1($value);
         if (!isset($this->imageSizeCache[$key])) {
             $image = base64_decode($this->removeBase64Mime($value));
             $size = getimagesizefromstring($image);
-            $this->imageSizeCache[$key] = [$size[0], $size[1]];
+
+            $width = $size[0] * 0.02;
+            $height = $size[1] * 0.02;
+
+            $maxWidth = $maxWidth ? (float) $maxWidth : null;
+            if ($maxWidth && $width > $maxWidth) {
+                $ratio = $maxWidth / $width;
+                $width = $maxWidth;
+                $height = $ratio * $height;
+            }
+
+            $maxHeight = $maxHeight ? (float) $maxHeight : null;
+            if ($maxHeight && $height > $maxHeight) {
+                $ratio = $maxHeight / $height;
+                $height = $maxHeight;
+                $width = $ratio * $width;
+            }
+
+            $this->imageSizeCache[$key] = [
+                round($width, 2) . 'cm',
+                round($height, 2) . 'cm',
+            ];
+            ray($this->imageSizeCache[$key]);
         }
 
         return $this->imageSizeCache[$key];
