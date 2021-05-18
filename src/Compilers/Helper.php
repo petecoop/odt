@@ -55,7 +55,6 @@ class Helper
                 round($width, 2) . 'cm',
                 round($height, 2) . 'cm',
             ];
-            ray($this->imageSizeCache[$key]);
         }
 
         return $this->imageSizeCache[$key];
