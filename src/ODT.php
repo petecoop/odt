@@ -17,4 +17,9 @@ class ODT
     {
         return new Template($path, $this->compiler);
     }
+
+    public function compiler()
+    {
+        return $this->compiler;
+    }
 }
