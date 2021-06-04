@@ -12,7 +12,7 @@ class VariableCleaner implements Compiler
         $variablePattern = '/{[^}]*{[^}]*\$.+?}[^{]*}/s';
         $value = $this->cleanPattern($value, $variablePattern);
 
-        $bladeDirectives = '/(@[a-z]+\(.+?\))</s';
+        $bladeDirectives = '/(@[a-z]+\(.+?\))/s';
         $value = $this->cleanPattern($value, $bladeDirectives);
 
         return $value;
