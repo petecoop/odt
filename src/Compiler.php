@@ -38,7 +38,8 @@ class Compiler
         $xml = $this->precompile($xml, $template, $args);
         $xml = $this->bladeCompile($xml);
 
-        return $this->render($xml, $args);
+        $xml = $this->render($xml, $args);
+        return $this->postRender($xml);
     }
 
     private function precompile(string $value, Template $template, array $args): string
@@ -87,6 +88,8 @@ class Compiler
     private function convertOperators(string $value): string
     {
         $value = str_replace('T_OBJECT_OPERATOR', '->', $value);
+        $value = str_replace('<?', 'PHP_OPEN_TAG', $value);
+        $value = str_replace('?>', 'PHP_CLOSE_TAG', $value);
 
         return $value;
     }
@@ -96,5 +99,13 @@ class Compiler
         $this->bladeCompiler->directive('image', function ($expression) {
             return (new ImageDirective())->compile($expression);
         });
+    }
+
+    private function postRender(string $xml): string
+    {
+        $xml = str_replace('PHP_OPEN_TAG', '<?',  $xml);
+        $xml = str_replace('PHP_CLOSE_TAG', '?>', $xml);
+
+        return $xml;
     }
 }
