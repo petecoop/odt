@@ -15,11 +15,11 @@
     },
     "require": {
         "nelexa/zip": "^4.0",
-        "symfony/css-selector": "^5.2",
-        "symfony/dom-crawler": "^5.2",
-        "spatie/temporary-directory": "^1.3",
-        "symfony/process": "^5.2",
-        "illuminate/view": "^8.0"
+        "symfony/css-selector": "^5.2|^6.0",
+        "symfony/dom-crawler": "^5.2|^6.0",
+        "spatie/temporary-directory": "^1.3|^2.1",
+        "symfony/process": "^5.2|^6.0",
+        "illuminate/view": "^8.0|^9.0"
     },
     "extra": {
         "laravel": {
