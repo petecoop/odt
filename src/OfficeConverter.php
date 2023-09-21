@@ -7,7 +7,9 @@ use Symfony\Component\Process\Process;
 
 class OfficeConverter
 {
-    private string $bin;
+    protected string $bin;
+
+    protected $includePath = '$PATH:/usr/local/bin:/opt/homebrew/bin';
 
     public function __construct(string $bin = 'soffice')
     {
@@ -16,8 +18,8 @@ class OfficeConverter
 
     public function convert(string $odtInput, string $outputPath)
     {
-        $process = new Process([
-            $this->bin,
+
+        $options = [
             '--headless',
             '--invisible',
             '--nocrashreport',
@@ -31,7 +33,13 @@ class OfficeConverter
             $odtInput,
             '--outdir',
             $outputPath,
-        ]);
+        ];
+
+        $process = Process::fromShellCommandline(
+            "PATH={$this->includePath}" . ' ' .
+            $this->bin . ' ' .
+            implode(' ', $options)
+        );
 
         $process->run();
 
