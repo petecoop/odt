@@ -8,6 +8,7 @@ class Template
 {
     private string $path;
     private Compiler $compiler;
+    private ZipFile $zip;
 
     private array $tableOptions = [];
 
