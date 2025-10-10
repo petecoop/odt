@@ -13,6 +13,7 @@ class TableCompiler implements Compiler
     private array $values;
     private array $options;
 
+    private DOMDocument $dom;
     private Crawler $crawler;
     private Crawler $table;
     private Crawler $header;
@@ -20,6 +21,8 @@ class TableCompiler implements Compiler
     private Crawler $row;
 
     private string $columnTemplate;
+    private string $columnStyleTemplate;
+    private Crawler $columnTarget;
     private string $headerTemplate;
     private string $cellTemplate;
     private string $cellContentTemplate;

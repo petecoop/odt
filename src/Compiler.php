@@ -6,6 +6,7 @@ use Petecoop\ODT\Compilers\Helper;
 use Petecoop\ODT\Compilers\VariableCleaner;
 use Petecoop\ODT\Directives\ImageDirective;
 use Illuminate\View\Compilers\BladeCompiler;
+use Illuminate\View\Concerns\ManagesLoops;
 use Petecoop\ODT\Compilers\TableRowCompiler;
 use Petecoop\ODT\Compilers\TableDirectiveCompiler;
 
@@ -69,6 +70,13 @@ class Compiler
         $args = $args + [
             '__compiler' => new Helper(),
         ];
+
+        // If using outside of Laravel provide the bare minimum __env
+        if (!isset($args['__env'])) {
+            $args['__env'] = new class{
+                use ManagesLoops;
+            };
+        }
 
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
