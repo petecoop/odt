@@ -4,3 +4,4 @@
 .release-it export-ignore
 phpunit.xml export-ignore
 tests export-ignore
+mago.toml export-ignore

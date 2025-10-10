@@ -18,26 +18,26 @@ class TableDirectiveCompiler implements Compiler
 
     public function compile(string $value): string
     {
-        $pattern = "/@table\((.+?)\)(.+?)@endtable/";
+        $pattern = '/@table\((.+?)\)(.+?)@endtable/';
         $offset = 0;
         while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
             $offset = $match[0][1];
             $content = $match[0][0];
             $length = strlen($content);
-            $key = str_replace('$', "", strip_tags($match[1][0]));
+            $key = str_replace('$', '', strip_tags($match[1][0]));
 
             preg_match("/table:name=\"(.+?)\"/", $content, $m);
             $name = $m[1];
 
             // remove the @table tags
-            [$value, $offset, , $removedEnd] = $this->removeClosestTag($value, "text:p", $offset);
+            [$value, $offset, , $removedEnd] = $this->removeClosestTag($value, 'text:p', $offset);
             $length -= $removedEnd;
-            [$value, , $removedStart] = $this->removeClosestTag($value, "text:p", $offset + $length);
+            [$value, , $removedStart] = $this->removeClosestTag($value, 'text:p', $offset + $length);
             $length -= $removedStart;
 
             // if no key or key empty remove table
             if (!isset($this->args[$key]) || empty($this->args[$key])) {
-                $value = substr_replace($value, "", $offset, $length);
+                $value = substr_replace($value, '', $offset, $length);
                 continue;
             }
 
@@ -50,8 +50,8 @@ class TableDirectiveCompiler implements Compiler
 
     private function removeClosestTag(string $value, string $tag, int $offset): array
     {
-        $tagStart = "<" . $tag;
-        $tagEnd = "</" . $tag . ">";
+        $tagStart = '<' . $tag;
+        $tagEnd = '</' . $tag . '>';
 
         // search backwards from offset to find the start
         $start = strrpos($value, $tagStart, $offset - strlen($value));
@@ -60,7 +60,7 @@ class TableDirectiveCompiler implements Compiler
         $end = strpos($value, $tagEnd, $offset) + strlen($tagEnd);
 
         $len = $end - $start;
-        $value = substr_replace($value, "", $start, $len);
+        $value = substr_replace($value, '', $start, $len);
 
         $removedStart = $offset - $start;
         $removedEnd = $end - $offset;
