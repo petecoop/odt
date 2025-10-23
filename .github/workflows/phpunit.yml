@@ -29,4 +29,4 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - run: vendor/bin/phpunit tests
+      - run: vendor/bin/pest --coverage

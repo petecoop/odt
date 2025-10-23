@@ -2,13 +2,14 @@
 
 namespace Petecoop\ODT;
 
-use Petecoop\ODT\Compilers\Helper;
-use Petecoop\ODT\Compilers\VariableCleaner;
-use Petecoop\ODT\Directives\ImageDirective;
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\Concerns\ManagesLoops;
-use Petecoop\ODT\Compilers\TableRowCompiler;
+use Petecoop\ODT\Compilers\Helper;
 use Petecoop\ODT\Compilers\TableDirectiveCompiler;
+use Petecoop\ODT\Compilers\TableRowCompiler;
+use Petecoop\ODT\Compilers\VariableCleaner;
+use Petecoop\ODT\Directives\ImageDirective;
+use Petecoop\ODT\Files\OdtFile;
 
 class Compiler
 {
@@ -23,27 +24,45 @@ class Compiler
         $this->bladeDirectives();
     }
 
-    public function compile(Template $template, array $args = [], array $options = []): array
+    /**
+     * Compile the content and styles of an ODT template
+     * @param array{cleanVars: bool} $options
+     * @return array{content: string, styles: string}
+     */
+    public function compile(OdtFile $template, array $args = [], array $options = []): array
     {
         return [
-            'content' => $this->compileXML($template->content(), $template, $args, $options),
-            'styles' => $this->compileXML($template->styles(), $template, $args, $options),
+            'content' => $this->compileTemplate($template->content(), $template, $args, $options),
+            'styles' => $this->compileTemplate($template->styles(), $template, $args, $options),
         ];
     }
 
-    private function compileXML(string $xml, Template $template, array $args = [], array $options = []): string
+    /**
+     * @param array{content: string, styles: string} $compiled
+     */
+    public function render(array $compiled, array $args = []): array
     {
-        if ($options['cleanVars'] ?? false) {
+        return [
+            'content' => $this->renderTemplate($compiled['content'], $args),
+            'styles' => $this->renderTemplate($compiled['styles'], $args),
+        ];
+    }
+
+    /**
+     * @param array{cleanVars: bool} $options
+     */
+    private function compileTemplate(string $xml, OdtFile $template, array $args = [], array $options = []): string
+    {
+        if (!isset($options['cleanVars']) || $options['cleanVars'] !== false) {
             $xml = (new VariableCleaner())->compile($xml);
         }
         $xml = $this->precompile($xml, $template, $args);
         $xml = $this->bladeCompile($xml);
 
-        $xml = $this->render($xml, $args);
-        return $this->postRender($xml);
+        return $xml;
     }
 
-    private function precompile(string $value, Template $template, array $args): string
+    private function precompile(string $value, OdtFile $template, array $args): string
     {
         $tableOptions = $template->getTableOptions();
         $value = (new TableDirectiveCompiler($args, $tableOptions))->compile($value);
@@ -65,15 +84,16 @@ class Compiler
         return $compiled;
     }
 
-    private function render(string $renderableContent, $args): string
+    private function renderTemplate(string $renderableContent, $args): string
     {
-        $args = $args + [
+        $args = $args
+        + [
             '__compiler' => new Helper(),
         ];
 
         // If using outside of Laravel provide the bare minimum __env
         if (!isset($args['__env'])) {
-            $args['__env'] = new class{
+            $args['__env'] = new class {
                 use ManagesLoops;
             };
         }
@@ -81,13 +101,15 @@ class Compiler
         ob_start();
         extract(array_merge($this->globalArgs, $args), EXTR_SKIP);
         try {
-            eval('?>'.$renderableContent);
-        } catch (\Exception $e) {
-            ob_get_clean();
+            eval('?>' . $renderableContent);
+        } catch (\Throwable $e) {
+            ob_end_clean();
             throw $e;
         }
 
-        return ob_get_clean();
+        $output = ob_get_clean();
+
+        return $this->postRender($output);
     }
 
     /**
@@ -111,7 +133,7 @@ class Compiler
 
     private function postRender(string $xml): string
     {
-        $xml = str_replace('PHP_OPEN_TAG', '<?',  $xml);
+        $xml = str_replace('PHP_OPEN_TAG', '<?', $xml);
         $xml = str_replace('PHP_CLOSE_TAG', '?>', $xml);
 
         return $xml;
