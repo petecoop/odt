@@ -35,7 +35,6 @@ class OfficeConverter implements Converter
             $file->save($tmpPath);
 
             $pdfPath = $tmp . '/temp.pdf';
-            dump($pdfPath);
 
             $options = [
                 '--headless',

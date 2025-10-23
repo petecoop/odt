@@ -6,6 +6,8 @@ use Petecoop\ODT\Converters\OfficeConverter;
 use Petecoop\ODT\Files\OdtFile;
 use Petecoop\ODT\ODT;
 
+test('will not use dump, dd or ray')->expect(['dd', 'dump', 'ray'])->not->toBeUsed();
+
 test('create instance', function () {
     expect($this->odt())->toBeInstanceOf(ODT::class);
 
