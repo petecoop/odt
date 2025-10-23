@@ -10,7 +10,9 @@ I've found that there are some things that just can't be done when generating PD
 
 ### Installation
 
-`composer require petecoop/odt`
+```bash
+composer require petecoop/odt
+```
 
 ### Usage
 
