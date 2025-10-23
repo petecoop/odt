@@ -85,6 +85,14 @@ $pdf = ODT::gotenberg('http://localhost:3000')
     ->pdf();
 ```
 
+A HTTP Client is required to be installed, if outside of Laravel you can install the Guzzle client:
+
+```bash
+composer require php-http/guzzle7-adapter
+```
+
+See a full [list of clients](https://docs.php-http.org/en/latest/clients.html) if you'd like to use a different one.
+
 #### Saving or Downloading
 
 The resulting .odt or PDF file can be saved to disk or returned as a download response:
