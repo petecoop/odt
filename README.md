@@ -130,11 +130,20 @@ Use the `@image` directive to embed base64 encoded images into your ODT template
 When in Libre/Open Office you can't wrap a `@foreach` around a table row - use `@rowforeach`, this can be done inside a table cell. The entire row will be repeated for each item.
 
 ```blade
-@rowforeach ($users as $user)
+@rowforeach($users as $user)
 {{ $user->name }}
 ```
 
 All other cells in the row will have access to the `$user` variable.
+
+`@rowif` can be used to conditionally include a table row based on an expression. This is useful if you want to display a row only when certain conditions are met.
+
+```blade
+@rowif($product->description)
+{{ $product->description }}
+```
+
+Note: due to a limitation of matching nested parentheses, only one level of nested parentheses is supported in the `@rowforeach(...)` and `@rowif(...)` expressions. e.g. `@rowforeach($users as $user)` or `@rowforeach($items->where('active', true) as $item)` will work, but more complex expressions with multiple levels of parentheses will not.
 
 If you need more control over what is before / after the row use `@beforerow / @endbeforerow` and `@afterrow / @endafterrow`. This example is the equivalent of the above but allows you to put any other directives before or after the row.
 

@@ -8,6 +8,7 @@ namespace Petecoop\ODT\Compilers;
  * Anything inside @beforerow ... @endbeforerow is moved to just before the enclosing <table:table-row>
  * Anything inside @afterrow ... @endafterrow is moved to just after the enclosing </table:table-row>
  * @rowforeach(...) is a shorthand for wrapping the row in a foreach loop
+ * @rowif(...) is a shorthand for wrapping the row in an if statement
  *
  * This allows other blade directives to be inserted before/after the table row to e.g. create a foreach loop
  */
@@ -16,23 +17,47 @@ class TableRowCompiler implements Compiler
     public function compile(string $value): string
     {
         $value = $this->compileRowForeach($value);
+        $value = $this->compileRowIf($value);
         $value = $this->compileBefore($value);
         $value = $this->compileAfter($value);
 
         return $value;
     }
 
+    /**
+     * Compile @rowforeach(...) into @beforerow@foreach(...)@endbeforerow@afterrow@endforeach@endafterrow
+     * Allows 1 level of nested parentheses inside the expression
+     */
     private function compileRowForeach(string $value): string
     {
         // find @rowforeach(...)
-        $pattern = '/@rowforeach(\(.+ +as +.*\))/s';
+        $pattern = '/@rowforeach *\(([^()]*(\([^()]*\)[^()]*)* +as +[^()]*(\([^()]*\)[^()]*)*)\)/s';
         while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
             $offset = $match[0][1];
             $content = $match[1][0];
             $length = strlen($match[0][0]);
 
-            // replace with @bef(...)
-            $replacement = '@beforerow@foreach' . $content . '@endbeforerow@afterrow@endforeach@endafterrow';
+            $replacement = '@beforerow@foreach(' . $content . ')@endbeforerow@afterrow@endforeach@endafterrow';
+            $value = substr_replace($value, $replacement, $offset, $length);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Compile @rowif(...) into @beforerow@if(...)@endbeforerow@afterrow@endif@endafterrow
+     * Allows 1 level of nested parentheses inside the expression
+     */
+    private function compileRowIf(string $value): string
+    {
+        // find @rowif(...)
+        $pattern = '/@rowif *\(([^()]*(\([^()]*\)[^()]*)*)\)/s';
+        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
+            $offset = $match[0][1];
+            $content = $match[1][0];
+            $length = strlen($match[0][0]);
+
+            $replacement = '@beforerow@if(' . $content . ')@endbeforerow@afterrow@endif@endafterrow';
             $value = substr_replace($value, $replacement, $offset, $length);
         }
 
