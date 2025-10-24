@@ -2,6 +2,7 @@
 
 namespace Petecoop\ODT\Files;
 
+use Exception;
 use Illuminate\Contracts\Support\Responsable;
 use Stringable;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -49,9 +50,15 @@ abstract class File implements Responsable, Stringable
 
     public function save(null|string $fileName): self
     {
-        $handle = fopen($this->addExtensionToFileName($fileName ?? $this->fileName), 'w+b');
+        $handle = fopen($this->addExtensionToFileName($fileName ?? $this->fileName), 'w');
+        if (!$handle) {
+            throw new Exception("Could not open file for writing: " . error_get_last()['message']);
+        }
+
         $this->toStream($handle);
         fclose($handle);
+
+
         return $this;
     }
 
