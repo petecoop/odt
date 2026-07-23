@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Compilers;
 
 /**
@@ -13,9 +15,8 @@ class VariableCleaner implements Compiler
         $value = $this->cleanPattern($value, $variablePattern);
 
         $bladeDirectives = '/(@[a-z]+\(.+?\))/s';
-        $value = $this->cleanPattern($value, $bladeDirectives);
 
-        return $value;
+        return $this->cleanPattern($value, $bladeDirectives);
     }
 
     private function cleanPattern(string $value, string $pattern): string
@@ -47,7 +48,7 @@ class VariableCleaner implements Compiler
             preg_match_all('/<\/(.+?)>/', $content, $closingTags);
             if (count($openingTags[0]) > count($closingTags[0])) {
                 // more opening tags - remove next closing tag
-                $tag = '</' . array_slice($openingTags[1], -1)[0] . '>';
+                $tag = '</'.array_slice($openingTags[1], -1)[0].'>';
                 $end = strpos($value, $tag, $offset + $length) + strlen($tag);
                 $diff = $end - ($offset + $length);
                 $cleanedLength += $diff;
@@ -56,7 +57,7 @@ class VariableCleaner implements Compiler
 
             if (count($openingTags[0]) < count($closingTags[0])) {
                 // more closing - remove previous opening tag
-                $tag = '<' . array_slice($closingTags[1], -1)[0];
+                $tag = '<'.array_slice($closingTags[1], -1)[0];
                 $start = strrpos($value, $tag, $offset - strlen($value));
                 $diff = $offset - $start;
                 $cleanedLength += $diff;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Compilers;
 
 /**
@@ -19,9 +21,8 @@ class TableRowCompiler implements Compiler
         $value = $this->compileRowForeach($value);
         $value = $this->compileRowIf($value);
         $value = $this->compileBefore($value);
-        $value = $this->compileAfter($value);
 
-        return $value;
+        return $this->compileAfter($value);
     }
 
     /**
@@ -37,7 +38,7 @@ class TableRowCompiler implements Compiler
             $content = $match[1][0];
             $length = strlen($match[0][0]);
 
-            $replacement = '@beforerow@foreach(' . $content . ')@endbeforerow@afterrow@endforeach@endafterrow';
+            $replacement = '@beforerow@foreach('.$content.')@endbeforerow@afterrow@endforeach@endafterrow';
             $value = substr_replace($value, $replacement, $offset, $length);
         }
 
@@ -57,7 +58,7 @@ class TableRowCompiler implements Compiler
             $content = $match[1][0];
             $length = strlen($match[0][0]);
 
-            $replacement = '@beforerow@if(' . $content . ')@endbeforerow@afterrow@endif@endafterrow';
+            $replacement = '@beforerow@if('.$content.')@endbeforerow@afterrow@endif@endafterrow';
             $value = substr_replace($value, $replacement, $offset, $length);
         }
 
@@ -85,76 +86,6 @@ class TableRowCompiler implements Compiler
 
     private function compileAfter(string $value): string
     {
-        // find @afterrow
-        // insert after </table:table-row>
-        $pattern = '/@afterrow(.+?)@endafterrow/';
-        while (preg_match($pattern, $value, $match, PREG_OFFSET_CAPTURE)) {
-            $offset = $match[0][1];
-            $content = $match[1][0];
-            $length = strlen($match[0][0]);
-
-            $openTag = '<table:table-row';
-            $closeTag = '</table:table-row>';
-
-            // find the enclosing row start (nearest <table:table-row before the directive)
-            $rowStart = strrpos($value, $openTag, $offset - strlen($value));
-
-            if ($rowStart === false) {
-                // fallback: find the first closing tag after the directive
-                $pos = strpos($value, $closeTag, $offset);
-                if ($pos === false) {
-                    // nothing to insert into; just remove directive
-                    $value = substr_replace($value, '', $offset, $length);
-                    continue;
-                }
-                $insertPos = $pos + strlen($closeTag);
-            } else {
-                // walk forward from the found opening tag and match nested tags
-                $i = $rowStart + strlen($openTag);
-                $depth = 0;
-                $insertPos = false;
-
-                while (true) {
-                    $nextOpen = strpos($value, $openTag, $i);
-                    $nextClose = strpos($value, $closeTag, $i);
-
-                    if ($nextClose === false) {
-                        // unmatched; abort to fallback
-                        break;
-                    }
-
-                    if ($nextOpen !== false && $nextOpen < $nextClose) {
-                        // nested opening before next closing
-                        $depth++;
-                        $i = $nextOpen + strlen($openTag);
-                    } else {
-                        // encountered a closing tag
-                        if ($depth === 0) {
-                            $insertPos = $nextClose + strlen($closeTag);
-                            break;
-                        }
-                        $depth--;
-                        $i = $nextClose + strlen($closeTag);
-                    }
-                }
-
-                if ($insertPos === false) {
-                    // fallback to next close after directive
-                    $pos = strpos($value, $closeTag, $offset);
-                    if ($pos === false) {
-                        $value = substr_replace($value, '', $offset, $length);
-                        continue;
-                    }
-                    $insertPos = $pos + strlen($closeTag);
-                }
-            }
-
-            // insert content after the matched closing tag
-            $value = substr_replace($value, $content, $insertPos, 0);
-            // remove the directive
-            $value = substr_replace($value, '', $offset, $length);
-        }
-
-        return $value;
+        return (new TableRowAfterCompiler)->compile($value);
     }
 }

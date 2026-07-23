@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Files;
 
 use Exception;
@@ -24,10 +26,11 @@ abstract class File implements Responsable, Stringable
 
     public function name(string $fileName): self
     {
-        if (!str_ends_with($fileName, '.' . $this->extension)) {
-            $fileName .= '.' . $this->extension;
+        if (! str_ends_with($fileName, '.'.$this->extension)) {
+            $fileName .= '.'.$this->extension;
         }
         $this->fileName = $this->addExtensionToFileName($fileName);
+
         return $this;
     }
 
@@ -40,6 +43,7 @@ abstract class File implements Responsable, Stringable
     {
         $this->name(basename($path));
         $handle = fopen($path, 'rb');
+
         return $this->fromStream($handle);
     }
 
@@ -48,16 +52,15 @@ abstract class File implements Responsable, Stringable
         return isset($this->stream);
     }
 
-    public function save(null|string $fileName): self
+    public function save(?string $fileName): self
     {
         $handle = fopen($this->addExtensionToFileName($fileName ?? $this->fileName), 'w');
-        if (!$handle) {
-            throw new Exception("Could not open file for writing: " . error_get_last()['message']);
+        if (! $handle) {
+            throw new Exception('Could not open file for writing: '.error_get_last()['message']);
         }
 
         $this->toStream($handle);
         fclose($handle);
-
 
         return $this;
     }
@@ -87,12 +90,13 @@ abstract class File implements Responsable, Stringable
     public function fromStream($stream): self
     {
         $this->stream = $stream;
+
         return $this;
     }
 
     public function toStream($handle): void
     {
-        if (!isset($this->stream)) {
+        if (! isset($this->stream)) {
             throw new \RuntimeException(
                 'No stream available. Open a file or set the content from a string or stream first.',
             );
@@ -108,7 +112,7 @@ abstract class File implements Responsable, Stringable
      */
     public function toResponse($request)
     {
-        $response = new StreamedResponse();
+        $response = new StreamedResponse;
         $resource = fopen('php://temp', 'r+b');
         $this->toStream($resource);
 
@@ -122,7 +126,7 @@ abstract class File implements Responsable, Stringable
         ];
         $response->headers->replace($headers);
 
-        $response->setCallback(function () use ($resource) {
+        $response->setCallback(static function () use ($resource) {
             $output = fopen('php://output', 'w+b');
             rewind($resource);
             stream_copy_to_stream($resource, $output);
@@ -133,12 +137,13 @@ abstract class File implements Responsable, Stringable
         return $response;
     }
 
-    public function asAttachment(null|string $fileName = null): self
+    public function asAttachment(?string $fileName = null): self
     {
         if ($fileName) {
             $this->name($fileName);
         }
         $this->asAttachment = true;
+
         return $this;
     }
 
@@ -146,7 +151,7 @@ abstract class File implements Responsable, Stringable
     {
         $ext = strtolower(pathinfo($this->fileName, \PATHINFO_EXTENSION));
 
-        if (!empty($ext) && isset(self::DEFAULT_MIME_TYPES[$ext])) {
+        if (! empty($ext) && isset(self::DEFAULT_MIME_TYPES[$ext])) {
             return self::DEFAULT_MIME_TYPES[$ext];
         }
 
@@ -155,9 +160,10 @@ abstract class File implements Responsable, Stringable
 
     protected function addExtensionToFileName(string $fileName): string
     {
-        if (!str_ends_with($fileName, '.' . $this->extension)) {
-            $fileName .= '.' . $this->extension;
+        if (! str_ends_with($fileName, '.'.$this->extension)) {
+            $fileName .= '.'.$this->extension;
         }
+
         return $fileName;
     }
 

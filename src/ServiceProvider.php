@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
@@ -11,9 +13,10 @@ class ServiceProvider extends BaseServiceProvider implements DeferrableProvider
 {
     public function register()
     {
-        $this->app->bind(ODT::class, function ($app) {
-            return new ODT($app->make(BladeCompiler::class), $app->make(Factory::class)->getShared());
-        });
+        $this->app->bind(
+            ODT::class,
+            static fn ($app) => new ODT($app->make(BladeCompiler::class), $app->make(Factory::class)->getShared()),
+        );
     }
 
     public function provides()

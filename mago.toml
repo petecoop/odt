@@ -1,1 +1,21 @@
 php-version = "8.1"
+
+[source]
+paths = ["src", "tests"]
+
+[formatter]
+preset = "laravel-pint"
+
+[linter]
+integrations = ["laravel", "pest"]
+
+[linter.rules]
+literal-named-argument = { enabled = false }
+no-literal-password = { enabled = false }
+cyclomatic-complexity = { enabled = false }
+no-else-clause = { enabled = false }
+too-many-properties = { enabled = false }
+too-many-methods = { enabled = false }
+no-empty = { enabled = false }
+no-boolean-flag-parameter = { enabled = false }
+no-isset = { enabled = false }

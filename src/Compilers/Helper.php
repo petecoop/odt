@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Compilers;
 
 /**
@@ -24,14 +26,15 @@ class Helper
     {
         $find = 'base64,';
         $pos = strpos($value, $find);
+
         return $pos !== false ? substr_replace($value, '', 0, $pos + strlen($find)) : $value;
     }
 
-    public function getBase64ImageDimensions(string $value, null|string $maxWidth = null, null|string $maxHeight = null)
+    public function getBase64ImageDimensions(string $value, ?string $maxWidth = null, ?string $maxHeight = null)
     {
         $key = sha1($value);
-        if (!isset($this->imageSizeCache[$key])) {
-            $image = base64_decode($this->removeBase64Mime($value));
+        if (! isset($this->imageSizeCache[$key])) {
+            $image = base64_decode($this->removeBase64Mime($value), strict: true);
             $size = getimagesizefromstring($image);
 
             $width = $size[0] * 0.02;
@@ -51,7 +54,7 @@ class Helper
                 $width = $ratio * $width;
             }
 
-            $this->imageSizeCache[$key] = [round($width, 2) . 'cm', round($height, 2) . 'cm'];
+            $this->imageSizeCache[$key] = [round($width, 2).'cm', round($height, 2).'cm'];
         }
 
         return $this->imageSizeCache[$key];

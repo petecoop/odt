@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Petecoop\ODT\Compiler;
 use Petecoop\ODT\Converters\GotenbergConverter;
 use Petecoop\ODT\Converters\OfficeConverter;
@@ -35,9 +37,9 @@ test('render template', function () {
 
 test('ensure template errors are caught and rethrown', function () {
     $template = $this->template(<<<'BLADE'
-    @if
-    <text:p>{{ $test }}</text:p>
-    BLADE);
+        @if
+        <text:p>{{ $test }}</text:p>
+        BLADE);
     $template->setCompiler($this->odt()->compiler());
     $template->render([]);
 })->throws(ParseError::class);
@@ -50,58 +52,57 @@ test('render', function ($xml, $args, $expected) {
     expect($rendered->content())->toEqual($expected);
 })->with('compileProvider');
 
-dataset('compileProvider', function () {
-    return [
-        [
-            <<<'BLADE'
+dataset('compileProvider', fn () => [
+    [
+        <<<'BLADE'
             <text:p>{{ $test }}</text:p>
             BLADE,
-            ['test' => 'Hello tests'],
-            <<<'XML'
+        ['test' => 'Hello tests'],
+        <<<'XML'
             <text:p>Hello tests</text:p>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <text:p>{{ $test ?? "n/a" }}</text:p>
             BLADE,
-            [],
-            <<<'XML'
+        [],
+        <<<'XML'
             <text:p>n/a</text:p>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <text:p>@if(!empty($value))</text:p>
             <text:p>{{ $value }}</text:p>
             <text:p>@endif</text:p>
             BLADE,
-            [],
-            <<<'XML'
+        [],
+        <<<'XML'
             <text:p></text:p>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <text:p>@if(!empty($value))</text:p>
             <text:p>{{ $value }}</text:p>
             <text:p>@endif</text:p>
             BLADE,
-            ['value' => 'some value'],
-            <<<'XML'
+        ['value' => 'some value'],
+        <<<'XML'
             <text:p></text:p>
             <text:p>some value</text:p>
             <text:p></text:p>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <text:p>@foreach($items as $item)</text:p>
             <text:p>{{ $item }}</text:p>
             <text:p>@endforeach</text:p>
             BLADE,
-            ['items' => [1, 2, 3]],
-            <<<'XML'
+        ['items' => [1, 2, 3]],
+        <<<'XML'
             <text:p></text:p>
             <text:p>1</text:p>
             <text:p></text:p>
@@ -110,9 +111,9 @@ dataset('compileProvider', function () {
             <text:p>3</text:p>
             <text:p></text:p>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -126,10 +127,10 @@ dataset('compileProvider', function () {
                 </table:table-row>
             </table:table>
             BLADE,
-            [
-                'items' => ['Row 1', 'Row 2', 'Row 3'],
-            ],
-            <<<'XML'
+        [
+            'items' => ['Row 1', 'Row 2', 'Row 3'],
+        ],
+        <<<'XML'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -150,9 +151,9 @@ dataset('compileProvider', function () {
                     </table:table-cell>
                 </table:table-row></table:table>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -172,10 +173,10 @@ dataset('compileProvider', function () {
                 </table:table-row>
             </table:table>
             BLADE,
-            [
-                'items' => ['Row 1', 'Row 2', 'Row 3'],
-            ],
-            <<<'XML'
+        [
+            'items' => ['Row 1', 'Row 2', 'Row 3'],
+        ],
+        <<<'XML'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -208,9 +209,9 @@ dataset('compileProvider', function () {
                     </table:table-cell>
                 </table:table-row></table:table>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -236,10 +237,10 @@ dataset('compileProvider', function () {
                 </table:table-row>
             </table:table>
             BLADE,
-            [
-                'items' => ['Row 1', 'Row 2'],
-            ],
-            <<<'XML'
+        [
+            'items' => ['Row 1', 'Row 2'],
+        ],
+        <<<'XML'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -277,9 +278,9 @@ dataset('compileProvider', function () {
                     </table:table-cell>
                 </table:table-row></table:table>
             XML,
-        ],
-        [
-            <<<'BLADE'
+    ],
+    [
+        <<<'BLADE'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -299,10 +300,10 @@ dataset('compileProvider', function () {
                 </table:table-row>
             </table:table>
             BLADE,
-            [
-                'items' => ['Row 1', 'Row 2', 'Row 3'],
-            ],
-            <<<'XML'
+        [
+            'items' => ['Row 1', 'Row 2', 'Row 3'],
+        ],
+        <<<'XML'
             <table:table>
                 <table:table-row>
                     <table:table-cell>
@@ -335,9 +336,8 @@ dataset('compileProvider', function () {
                     </table:table-cell>
                 </table:table-row></table:table>
             XML,
-        ],
-    ];
-});
+    ],
+]);
 
 test('set soffice binary', function () {
     $odt = ODT::make('/usr/bin/libreoffice');
@@ -389,16 +389,16 @@ test('gotenberg pdf conversion', function () {
 
 test('@image directive', function () {
     $template = $this->template(<<<'BLADE'
-    <text:p>@image($image, '4cm', '4cm')</text:p>
-    BLADE);
+        <text:p>@image($image, '4cm', '4cm')</text:p>
+        BLADE);
     $template->setCompiler($this->odt()->compiler());
 
     // get base64 image string
     $imageData = file_get_contents('tests/files/image.png');
-    $rendered = $template->render(['image' => 'data:image/png;base64,' . base64_encode($imageData)]);
+    $rendered = $template->render(['image' => 'data:image/png;base64,'.base64_encode($imageData)]);
 
     expect($rendered->content())
-        ->toContain('<office:binary-data>' . base64_encode($imageData) . '</office:binary-data>')
+        ->toContain('<office:binary-data>'.base64_encode($imageData).'</office:binary-data>')
         ->toContain('svg:width="4cm"')
         ->toContain('svg:height="1.23cm"');
 });

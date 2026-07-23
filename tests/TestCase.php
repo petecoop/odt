@@ -1,18 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\View\Compilers\BladeCompiler;
+use Orchestra\Testbench\TestCase as Orchestra;
 use Petecoop\ODT\Files\OdtFile;
 use Petecoop\ODT\ODT;
-use PHPUnit\Framework\TestCase as BaseTestCase;
 
-class TestCase extends BaseTestCase
+class TestCase extends Orchestra
 {
+    /**
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return array<int, class-string>
+     */
+    protected function getPackageProviders($app): array
+    {
+        return [\Petecoop\ODT\ServiceProvider::class];
+    }
+
     function odt(): ODT
     {
-        $blade = new BladeCompiler(new Filesystem(), 'tests/cache');
+        $blade = new BladeCompiler(new Filesystem, 'tests/cache');
+
         return new ODT($blade);
     }
 

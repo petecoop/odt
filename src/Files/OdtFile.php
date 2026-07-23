@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Files;
 
 use Petecoop\ODT\Compiler;
@@ -12,13 +14,13 @@ class OdtFile extends File
     protected string $extension = 'odt';
 
     protected ZipFile $zip;
-    protected null|string $content = null;
-    protected null|string $styles = null;
+    protected ?string $content = null;
+    protected ?string $styles = null;
     protected array $tableOptions = [];
 
-    protected null|ODT $instance = null;
-    protected null|Compiler $compiler = null;
-    protected null|Converter $converter = null;
+    protected ?ODT $instance = null;
+    protected ?Compiler $compiler = null;
+    protected ?Converter $converter = null;
 
     private function read(): self
     {
@@ -33,7 +35,7 @@ class OdtFile extends File
      */
     public function fromStream($stream): self
     {
-        $this->zip = new ZipFile();
+        $this->zip = new ZipFile;
         $this->zip->openFromStream($stream);
         $this->read();
 
@@ -45,8 +47,8 @@ class OdtFile extends File
      */
     public function toStream($handle): void
     {
-        if (!$this->isOpen()) {
-            $this->zip = new ZipFile();
+        if (! $this->isOpen()) {
+            $this->zip = new ZipFile;
         }
 
         if (isset($this->content)) {
@@ -77,7 +79,7 @@ class OdtFile extends File
 
     private function readEntry(string $entryName): string
     {
-        if (!$this->isOpen()) {
+        if (! $this->isOpen()) {
             throw new \Exception('ODT file is not open');
         }
 
@@ -104,6 +106,7 @@ class OdtFile extends File
     public function setContent(string $content): self
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -119,12 +122,14 @@ class OdtFile extends File
     public function setStyles(string $styles): self
     {
         $this->styles = $styles;
+
         return $this;
     }
 
     public function table(string $key, array $options): self
     {
         $this->tableOptions[$key] = $options;
+
         return $this;
     }
 
@@ -138,11 +143,11 @@ class OdtFile extends File
      */
     public function render(array $args = [], array $options = []): OdtFile
     {
-        if (!$this->compiler()) {
+        if (! $this->compiler()) {
             throw new \Exception('Compiler not set');
         }
 
-        if (!$this->isValid()) {
+        if (! $this->isValid()) {
             throw new \Exception('ODT file is not valid, it must have either content or styles');
         }
 
@@ -158,9 +163,9 @@ class OdtFile extends File
         return $output;
     }
 
-    public function pdf(null|string $fileName = null): PdfFile
+    public function pdf(?string $fileName = null): PdfFile
     {
-        if (!$this->converter()) {
+        if (! $this->converter()) {
             throw new \Exception('Converter not set');
         }
 
@@ -176,10 +181,11 @@ class OdtFile extends File
     public function setinstance(ODT $odt): self
     {
         $this->instance = $odt;
+
         return $this;
     }
 
-    public function compiler(): null|Compiler
+    public function compiler(): ?Compiler
     {
         return $this->compiler ?? $this->instance?->compiler();
     }
@@ -187,10 +193,11 @@ class OdtFile extends File
     public function setCompiler(Compiler $compiler): self
     {
         $this->compiler = $compiler;
+
         return $this;
     }
 
-    public function converter(): null|Converter
+    public function converter(): ?Converter
     {
         return $this->converter ?? $this->instance?->converter();
     }
@@ -198,6 +205,7 @@ class OdtFile extends File
     public function setConverter(Converter $converter): self
     {
         $this->converter = $converter;
+
         return $this;
     }
 }

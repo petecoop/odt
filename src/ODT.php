@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT;
 
 use Illuminate\Filesystem\Filesystem;
@@ -17,26 +19,27 @@ class ODT
     public function __construct(BladeCompiler $bladeCompiler, array $globalArgs = [])
     {
         $this->compiler = new Compiler($bladeCompiler, $globalArgs);
-        $this->converter = new OfficeConverter();
+        $this->converter = new OfficeConverter;
     }
 
     /**
      * Create a new instance of ODT
      * For use outside of Laravel.
      */
-    public static function make(null|string $bin = null): self
+    public static function make(?string $bin = null): self
     {
-        $blade = new BladeCompiler(new Filesystem(), '/', false);
+        $blade = new BladeCompiler(new Filesystem, '/', false);
         $odt = new self($blade);
         if ($bin) {
             $odt->officeBinary($bin);
         }
+
         return $odt;
     }
 
     public function open(string $path)
     {
-        $template = new OdtFile();
+        $template = new OdtFile;
         $template->open($path);
         $template->setInstance($this);
 

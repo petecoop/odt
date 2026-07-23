@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Converters;
 
 use Petecoop\ODT\Files\OdtFile;
@@ -18,6 +20,7 @@ class OfficeConverter implements Converter
     public function setBinaryPath(string $bin): self
     {
         $this->bin = $bin;
+
         return $this;
     }
 
@@ -31,10 +34,10 @@ class OfficeConverter implements Converter
         $tmp = $this->getSystemTemporaryDirectory();
 
         try {
-            $tmpPath = $tmp . '/temp.odt';
+            $tmpPath = $tmp.'/temp.odt';
             $file->save($tmpPath);
 
-            $pdfPath = $tmp . '/temp.pdf';
+            $pdfPath = $tmp.'/temp.pdf';
 
             $options = [
                 '--headless',
@@ -53,13 +56,13 @@ class OfficeConverter implements Converter
             ];
 
             $process = Process::fromShellCommandline(
-                "PATH={$this->includePath}" . ' ' . $this->bin . ' ' . implode(' ', $options),
+                "PATH={$this->includePath}".' '.$this->bin.' '.implode(' ', $options),
             );
 
             $process->run();
 
             if ($process->isSuccessful()) {
-                if (!file_exists($pdfPath)) {
+                if (! file_exists($pdfPath)) {
                     throw new \Exception("PDF file was not created at expected path: {$pdfPath}");
                 }
 
@@ -70,8 +73,9 @@ class OfficeConverter implements Converter
                 fclose($handle);
                 rewind($stream);
 
-                $pdf = new PdfFile();
+                $pdf = new PdfFile;
                 $pdf->name(basename($file->getName(), '.odt'));
+
                 return $pdf->fromStream($stream);
             }
 
@@ -92,10 +96,10 @@ class OfficeConverter implements Converter
     protected function getSystemTemporaryDirectory(): string
     {
         $location = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
-        $name = mt_rand() . '-' . str_replace([' ', '.'], '', microtime());
+        $name = mt_rand().'-'.str_replace([' ', '.'], '', microtime());
 
-        $path = $location . DIRECTORY_SEPARATOR . $name;
-        mkdir($path, 0777, true);
+        $path = $location.DIRECTORY_SEPARATOR.$name;
+        mkdir($path, 0o777, true);
 
         return $path;
     }

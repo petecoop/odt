@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Converters;
 
 use Petecoop\ODT\Files\OdtFile;

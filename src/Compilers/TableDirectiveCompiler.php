@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Compilers;
 
 /**
@@ -26,7 +28,7 @@ class TableDirectiveCompiler implements Compiler
             $length = strlen($content);
             $key = str_replace('$', '', strip_tags($match[1][0]));
 
-            preg_match("/table:name=\"(.+?)\"/", $content, $m);
+            preg_match('/table:name="(.+?)"/', $content, $m);
             $name = $m[1];
 
             // remove the @table tags
@@ -36,7 +38,7 @@ class TableDirectiveCompiler implements Compiler
             $length -= $removedStart;
 
             // if no key or key empty remove table
-            if (!isset($this->args[$key]) || empty($this->args[$key])) {
+            if (! isset($this->args[$key]) || empty($this->args[$key])) {
                 $value = substr_replace($value, '', $offset, $length);
                 continue;
             }
@@ -50,8 +52,8 @@ class TableDirectiveCompiler implements Compiler
 
     private function removeClosestTag(string $value, string $tag, int $offset): array
     {
-        $tagStart = '<' . $tag;
-        $tagEnd = '</' . $tag . '>';
+        $tagStart = '<'.$tag;
+        $tagEnd = '</'.$tag.'>';
 
         // search backwards from offset to find the start
         $start = strrpos($value, $tagStart, $offset - strlen($value));

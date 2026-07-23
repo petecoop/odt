@@ -4,6 +4,9 @@ Use Open Document Text (.odt) files as templates in PHP/Laravel projects, render
 
 This allows you to create complex document templates in LibreOffice or OpenOffice, including loops and conditionals using Blade syntax, render them with dynamic data and convert into PDF.
 
+> [!WARNING]
+> Only render templates from trusted authors. Blade templates are compiled and executed as PHP, so someone able to edit a template could execute application code.
+
 ### Why
 
 I've found that there are some things that just can't be done when generating PDF's with HTML or PDF libraries that word processors have solved. This is usually where dynamic content can flow over multiple pages, and you want to do things like repeat table headers, or have some items of text stay together, or other more complex layouts like anchoring a section to the bottom of the final page. This also allows non-developers to create and edit document templates in a familiar word processor rather than having to write HTML or code.
@@ -13,6 +16,8 @@ I've found that there are some things that just can't be done when generating PD
 ```bash
 composer require petecoop/odt
 ```
+
+The package supports Laravel 8 through 13. Laravel 13 requires PHP 8.3 or newer.
 
 ### Usage
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Compilers;
 
 use DOMDocument;
@@ -47,11 +49,11 @@ class TableCompiler implements Compiler
 
     private function setup(string $value)
     {
-        $this->dom = new DOMDocument();
+        $this->dom = new DOMDocument;
         $this->dom->loadXML($value);
         $this->crawler = new Crawler($this->dom);
 
-        $this->table = $this->crawler->filter('table|table[table|name="' . $this->name . '"]');
+        $this->table = $this->crawler->filter('table|table[table|name="'.$this->name.'"]');
         $this->header = $this->table->filter('table|table-row')->first();
         $this->column = $this->table->children('table|table-column')->first();
         $this->row = $this->table->children('table|table-row')->last();
@@ -76,23 +78,23 @@ class TableCompiler implements Compiler
     private function addColumns()
     {
         $item = $this->values[0] ?? null;
-        if (!$item) {
+        if (! $item) {
             return;
         }
 
         // if given an arrayable convert to array
-        if (!is_array($item) && is_object($item) && method_exists($item, 'toArray')) {
+        if (! is_array($item) && is_object($item) && method_exists($item, 'toArray')) {
             $item = $item->toArray();
         }
 
-        if (!is_array($item)) {
+        if (! is_array($item)) {
             return;
         }
 
         $keys = array_keys($item);
         foreach ($keys as $key) {
             $options = $this->options[$key] ?? [];
-            if (!is_array($options)) {
+            if (! is_array($options)) {
                 $options = ['title' => $options];
             }
 
@@ -114,7 +116,7 @@ class TableCompiler implements Compiler
 
         $style = $this->createColumnStyle($options['relativeWidth'] ?? 1);
 
-        if ($count == 1) {
+        if ($count === 1) {
             // if it's the first row then replace
             $this->table->getNode(0)->replaceChild($this->createColumn($style), $this->column->getNode(0));
             $headerCell = $this->header->children('table|table-cell')->first();
@@ -128,7 +130,7 @@ class TableCompiler implements Compiler
         }
     }
 
-    private function createColumn(null|string $style = null): DOMDocumentFragment
+    private function createColumn(?string $style = null): DOMDocumentFragment
     {
         $column = $this->columnTemplate;
 
@@ -141,28 +143,31 @@ class TableCompiler implements Compiler
 
     private function createColumnStyle(int $relativeWidth = 1): string
     {
-        if (!empty($this->columnStyles[$relativeWidth])) {
+        if (! empty($this->columnStyles[$relativeWidth])) {
             return $this->columnStyles[$relativeWidth];
         }
 
-        $name = 'TableRelativeWidth' . $relativeWidth;
+        $name = 'TableRelativeWidth'.$relativeWidth;
 
         $styleParent = $this->crawler->filter('office|automatic-styles')->first();
-        $count = $styleParent->filter('style|style[style|name="' . $name . '"]')->count();
+        $count = $styleParent->filter('style|style[style|name="'.$name.'"]')->count();
         if ($count) {
             $this->columnStyles[$relativeWidth] = $name;
+
             return $name;
         }
 
         $styleParent
             ->getNode(0)
-            ->appendChild($this->createFragment('<style:style style:name="'
-            . $name
-            . '" style:family="table-column">'
-            . '<style:table-column-properties style:rel-column-width="'
-            . $relativeWidth
-            . '000*" />'
-            . '</style:style>'));
+            ->appendChild($this->createFragment(
+                '<style:style style:name="'
+                .$name
+                .'" style:family="table-column">'
+                .'<style:table-column-properties style:rel-column-width="'
+                .$relativeWidth
+                .'000*" />'
+                .'</style:style>',
+            ));
 
         $this->columnStyles[$relativeWidth] = $name;
 
@@ -178,23 +183,24 @@ class TableCompiler implements Compiler
 
     private function createCell(string $key, bool $firstCell = false): DOMDocumentFragment
     {
-        $itemKey = '$' . preg_replace('/\W/', '', $this->key) . '_item';
+        $itemKey = '$'.preg_replace('/\W/', '', $this->key).'_item';
         $value = "{{ {$itemKey}['{$key}'] ?? '' }}";
 
         if ($firstCell) {
             $value =
                 '@beforerow@foreach($'
-                . $this->key
-                . ' as '
-                . $itemKey
-                . ')@endbeforerow'
-                . $value
-                . '@afterrow@endforeach@endafterrow';
+                .$this->key
+                .' as '
+                .$itemKey
+                .')@endbeforerow'
+                .$value
+                .'@afterrow@endforeach@endafterrow';
         }
 
         $content = preg_replace('/{{\s*\$row\s*}}/', $value, $this->cellContentTemplate);
 
         $cell = str_replace($this->cellContentTemplate, $content, $this->cellTemplate);
+
         return $this->createFragment($cell);
     }
 
@@ -211,6 +217,7 @@ class TableCompiler implements Compiler
     private function titleCase(string $value): string
     {
         $value = str_replace('_', ' ', $value);
+
         return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
     }
 }

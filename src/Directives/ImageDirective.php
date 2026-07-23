@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Directives;
 
 /**
@@ -22,16 +24,16 @@ class ImageDirective
         return (
             '<draw:frame
             svg:width="<?php echo $__compiler->getBase64ImageDimensions('
-            . $expression
-            . ')[0]; ?>"
+            .$expression
+            .')[0]; ?>"
             svg:height="<?php echo $__compiler->getBase64ImageDimensions('
-            . $expression
-            . ')[1]; ?>"
+            .$expression
+            .')[1]; ?>"
         >
             <draw:image xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad">
                 <office:binary-data><?php echo $__compiler->removeBase64Mime('
-            . $expression
-            . '); ?></office:binary-data>
+            .$expression
+            .'); ?></office:binary-data>
             </draw:image>
         </draw:frame>'
         );

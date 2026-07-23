@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Petecoop\ODT\Converters;
 
 use Gotenberg\Gotenberg;
@@ -17,6 +19,7 @@ class GotenbergConverter implements Converter
     public function setUrl(string $url): self
     {
         $this->url = $url;
+
         return $this;
     }
 
@@ -39,12 +42,13 @@ class GotenbergConverter implements Converter
 
         $stream = fopen('php://temp', 'r+b');
         $response->getBody()->rewind();
-        while (!$response->getBody()->eof()) {
+        while (! $response->getBody()->eof()) {
             fwrite($stream, $response->getBody()->read(1024));
         }
 
-        $pdf = new PdfFile();
+        $pdf = new PdfFile;
         $pdf->name(basename($file->getName(), '.odt'));
+
         return $pdf->fromStream($stream);
     }
 }
