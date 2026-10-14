@@ -20,7 +20,7 @@
     },
     "require-dev": {
         "orchestra/testbench": "^11.0",
-        "pestphp/pest": "^4.1",
+        "pestphp/pest": "^5.3.2",
         "petecoop/pest-plugin-watch": "^0.1",
         "mockery/mockery": "^1.6"
     },
