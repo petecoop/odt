@@ -1,56 +1,56 @@
 {
-    "name": "petecoop/odt",
-    "description": "Render .odt files with Blade, convert to pdf with Libre/OpenOffice",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Pete Cooper",
-            "email": "pete@petecoop.co.uk"
-        }
-    ],
-    "require": {
-        "php": "^8.1",
-        "illuminate/view": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
-        "nelexa/zip": "^4.0",
-        "symfony/css-selector": "^5.2|^6.0|^7.0|^8.0",
-        "symfony/dom-crawler": "^5.2|^6.0|^7.0|^8.0",
-        "symfony/http-foundation": "^5.2|^6.0|^7.0|^8.0",
-        "symfony/process": "^5.2|^6.0|^7.0|^8.0",
-        "gotenberg/gotenberg-php": "^2.14"
-    },
-    "require-dev": {
-        "orchestra/testbench": "^11.0",
-        "pestphp/pest": "^4.1",
-        "petecoop/pest-plugin-watch": "^0.1",
-        "mockery/mockery": "^1.6"
-    },
-    "scripts": {
-        "test": "pest"
-    },
-    "autoload": {
-        "psr-4": {
-            "Petecoop\\ODT\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Petecoop\\ODT\\ServiceProvider"
-            ],
-            "aliases": {
-                "ODT": "Petecoop\\ODT\\Facades\\ODT"
-            }
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
-        }
+  "name": "petecoop/odt",
+  "description": "Render .odt files with Blade, convert to pdf with Libre/OpenOffice",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Pete Cooper",
+      "email": "pete@petecoop.co.uk"
     }
+  ],
+  "require": {
+    "php": "^8.1",
+    "illuminate/view": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+    "nelexa/zip": "^4.0",
+    "symfony/css-selector": "^5.2|^6.0|^7.0|^8.0",
+    "symfony/dom-crawler": "^5.2|^6.0|^7.0|^8.0",
+    "symfony/http-foundation": "8.1.9",
+    "symfony/process": "^5.2|^6.0|^7.0|^8.0",
+    "gotenberg/gotenberg-php": "^2.14"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^11.0",
+    "pestphp/pest": "^4.1",
+    "petecoop/pest-plugin-watch": "^0.1",
+    "mockery/mockery": "^1.6"
+  },
+  "scripts": {
+    "test": "pest"
+  },
+  "autoload": {
+    "psr-4": {
+      "Petecoop\\ODT\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Petecoop\\ODT\\ServiceProvider"
+      ],
+      "aliases": {
+        "ODT": "Petecoop\\ODT\\Facades\\ODT"
+      }
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "php-http/discovery": true
+    }
+  }
 }
